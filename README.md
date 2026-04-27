@@ -1,15 +1,17 @@
 # Labrune - The Language Editor for NFS Games!  
 ---------------------------
-# v2 TODO - WORK IN PROGRESS:
-- [x] Rework file loading and saving.
-- [ ] Command line support.
-- [ ] String file sync-up. (Compare with another file and apply the changes to the one worked on)
-- [ ] Ability to change language chunk format.
-- [ ] Ability to include/exclude histogram.
-- [x] Ability to restore any backup. (.edbackup, .labrunebackup, .bacc, .bak or .bin_)
-- [x] Auto-Detect language file version + fix Labrune so it can open the files modified via Binary.
-- [ ] Rework Import/Export functionality (export done) + add support for Binary end scripts (import).
-- [x] Charset (Language Histogram) support.
+
+Fork of the original Labrune by nlgxzef for creating and maintaining international language files for [NFSCO](https://github.com/NFSCO).
+
+Modifications made:
++ ISO-8859-1 detection & fallback (needed for some NFS Carbon language files).
++ method for to validate if characters are present in the language files charset.
++ detailed error handling when writing characters that are not present in the language files charset for easier debugging.
++ added CharsetTransfer.csproj for transfering charsets between NFS Carbon language files (debug use only!).
+
+These changes were made to prepare Labrune for processing language files in all internationally recognized languages and character sets. In addition, error handling has been improved to make it easier to identify invalid characters.
+
+2026. No rights reserved.
 
 ---------------------------
 # Description:
