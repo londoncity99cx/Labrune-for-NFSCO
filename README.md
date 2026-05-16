@@ -4,10 +4,11 @@
 Fork of [Labrune](https://github.com/nlgxzef/Labrune) by [nlgxzef](https://github.com/nlgxzef) for creating and maintaining international language files for [NFSCO](https://github.com/NFSCO). As of right now, there is no intention to merge these changes with the main project.
 
 **Modifications made:**
-+ ISO-8859-1 detection & fallback (needed for some NFS Carbon language files).
-+ Option to ignore charset when saving
-+ method for to validate if characters are present in the language files charset.
-+ detailed error handling when writing characters that are not present in the language files charset for easier debugging.
++ added ISO-8859-1 detection & fallback.
++ added options for choosing between ISO-8859-1 and UTF8 encoding. ISO-8859-1 will be selected by default as it is used for all language files with western characters. UTF8 can be selected when saving files containing non-western characters (e.g. russian, thai, japanese etc.).
++ added option to ignore charset when saving.
++ added method for to validate if characters are present in the language files charset.
++ addded detailed error handling when writing characters that are not present in the language files charset for easier debugging.
 + added CharsetTransfer.csproj for transfering charsets between NFS Carbon language files (debug use only!).
 
 These changes were made to prepare Labrune for processing language files in all internationally recognized languages and character sets. In addition, error handling has been improved to make it easier to identify invalid characters. If you encounter any problems using the [Labrune for NFSCO](https://github.com/londoncity99cx/Labrune-for-NFSCO) fork, feel free to contact me.

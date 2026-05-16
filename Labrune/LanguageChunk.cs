@@ -18,6 +18,7 @@ namespace Labrune
         public Charset CharacterSet; // Old chunks only, from 0x10 to the StringRecordsOffset
         public List<LanguageStringRecord> Strings;
         public bool IgnoreCharsetOnSave = false; // For debugging purposes: ignores the charset when saving
+        public string EncodingMode = "ISO-8859-1"; // Encoding mode: "ISO-8859-1" or "UTF-8"
 
         public LanguageChunk(Chunk chunk, Charset characterset)
         {
@@ -236,8 +237,18 @@ namespace Labrune
                 }
                 else
                 {
-                    // No charset, use ISO-8859-1 (game standard for Western languages)
-                    StrRec.Text = System.Text.Encoding.GetEncoding("ISO-8859-1").GetString(rawBytes);
+                    // No charset, try to detect encoding
+                    // First try UTF-8
+                    string utf8Decoded = TryDecodeAsUTF8(rawBytes);
+                    if (utf8Decoded != null)
+                    {
+                        StrRec.Text = utf8Decoded;
+                    }
+                    else
+                    {
+                        // Fall back to ISO-8859-1 (game standard for Western languages)
+                        StrRec.Text = System.Text.Encoding.GetEncoding("ISO-8859-1").GetString(rawBytes);
+                    }
                 }
                 StrRec.IsModified = false;
 
@@ -279,8 +290,17 @@ namespace Labrune
                 }
                 else
                 {
-                    // No charset available or ignored, use ISO-8859-1 encoding (game standard for Western languages)
-                    encodedBytes = System.Text.Encoding.GetEncoding("ISO-8859-1").GetBytes(StrRec.Text + "\0");
+                    // No charset available or ignored, use the specified encoding mode
+                    if (EncodingMode == "UTF-8")
+                    {
+                        // UTF-8 encoding for non-Western languages
+                        encodedBytes = System.Text.Encoding.UTF8.GetBytes(StrRec.Text + "\0");
+                    }
+                    else
+                    {
+                        // ISO-8859-1 encoding (default for Western languages)
+                        encodedBytes = System.Text.Encoding.GetEncoding("ISO-8859-1").GetBytes(StrRec.Text + "\0");
+                    }
                 }
                 LanguageStringTableWriter.Write(encodedBytes);
             }

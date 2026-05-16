@@ -58,6 +58,9 @@
             this.PrevModifiedToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.NextModifiedToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator6 = new System.Windows.Forms.ToolStripSeparator();
+            this.ISO88591WesternToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.UTF8NonWesternToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator8 = new System.Windows.Forms.ToolStripSeparator();
             this.IgnoreCharsetOnSaveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.fontSettingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -236,6 +239,9 @@
             this.PrevModifiedToolStripMenuItem,
             this.NextModifiedToolStripMenuItem,
             this.toolStripSeparator6,
+            this.ISO88591WesternToolStripMenuItem,
+            this.UTF8NonWesternToolStripMenuItem,
+            this.toolStripSeparator8,
             this.IgnoreCharsetOnSaveToolStripMenuItem,
             this.fontSettingsToolStripMenuItem});
             this.editToolStripMenuItem.Name = "editToolStripMenuItem";
@@ -329,11 +335,32 @@
             this.toolStripSeparator6.Name = "toolStripSeparator6";
             this.toolStripSeparator6.Size = new System.Drawing.Size(218, 6);
             // 
+            // ISO88591WesternToolStripMenuItem
+            // 
+            this.ISO88591WesternToolStripMenuItem.Checked = true;
+            this.ISO88591WesternToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.ISO88591WesternToolStripMenuItem.Name = "ISO88591WesternToolStripMenuItem";
+            this.ISO88591WesternToolStripMenuItem.Size = new System.Drawing.Size(221, 22);
+            this.ISO88591WesternToolStripMenuItem.Text = "ISO-8859-1 (Western)";
+            this.ISO88591WesternToolStripMenuItem.Click += new System.EventHandler(this.ISO88591WesternToolStripMenuItem_Click);
+            // 
+            // UTF8NonWesternToolStripMenuItem
+            // 
+            this.UTF8NonWesternToolStripMenuItem.Name = "UTF8NonWesternToolStripMenuItem";
+            this.UTF8NonWesternToolStripMenuItem.Size = new System.Drawing.Size(221, 22);
+            this.UTF8NonWesternToolStripMenuItem.Text = "UTF8 (non-Western)";
+            this.UTF8NonWesternToolStripMenuItem.Click += new System.EventHandler(this.UTF8NonWesternToolStripMenuItem_Click);
+            // 
+            // toolStripSeparator8
+            // 
+            this.toolStripSeparator8.Name = "toolStripSeparator8";
+            this.toolStripSeparator8.Size = new System.Drawing.Size(218, 6);
+            // 
             // IgnoreCharsetOnSaveToolStripMenuItem
             // 
             this.IgnoreCharsetOnSaveToolStripMenuItem.Name = "IgnoreCharsetOnSaveToolStripMenuItem";
             this.IgnoreCharsetOnSaveToolStripMenuItem.Size = new System.Drawing.Size(221, 22);
-            this.IgnoreCharsetOnSaveToolStripMenuItem.Text = "Ignore Charset on Save (Debug)";
+            this.IgnoreCharsetOnSaveToolStripMenuItem.Text = "Ignore Charset on Save";
             this.IgnoreCharsetOnSaveToolStripMenuItem.Click += new System.EventHandler(this.IgnoreCharsetOnSaveToolStripMenuItem_Click);
             // 
             // fontSettingsToolStripMenuItem
@@ -545,6 +572,9 @@
         private System.Windows.Forms.ToolStripMenuItem PrevModifiedToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem NextModifiedToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator6;
+        private System.Windows.Forms.ToolStripMenuItem ISO88591WesternToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem UTF8NonWesternToolStripMenuItem;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator8;
         private System.Windows.Forms.ToolStripMenuItem IgnoreCharsetOnSaveToolStripMenuItem;
         private System.Windows.Forms.SaveFileDialog ExportFileDialog;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator7;

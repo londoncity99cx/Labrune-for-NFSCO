@@ -33,6 +33,7 @@ namespace Labrune
         bool IsFileModified = false;
         bool HasLabels = false;
         bool IgnoreCharsetOnSave = false; // Debug option: ignore charset when saving
+        string EncodingMode = "ISO-8859-1"; // Encoding mode: "ISO-8859-1" or "UTF-8"
 
         List<int> FoundValuesIndexes = new List<int>();
         List<int> ModifiedValuesIndexes = new List<int>();
@@ -392,12 +393,13 @@ namespace Labrune
                     }
                 }*/
 
-                // Apply ignore charset flag to all chunks before saving
+                // Apply ignore charset flag and encoding mode to all chunks before saving
                 foreach (var chunk in Files[0].Chunks)
                 {
                     if (chunk is LanguageChunk lc)
                     {
                         lc.IgnoreCharsetOnSave = IgnoreCharsetOnSave;
+                        lc.EncodingMode = EncodingMode;
                     }
                 }
 
@@ -436,12 +438,13 @@ namespace Labrune
                         }
                     }*/
 
-                    // Apply ignore charset flag to all chunks in label file
+                    // Apply ignore charset flag and encoding mode to all chunks in label file
                     foreach (var chunk in Files[1].Chunks)
                     {
                         if (chunk is LanguageChunk lc)
                         {
                             lc.IgnoreCharsetOnSave = IgnoreCharsetOnSave;
+                            lc.EncodingMode = EncodingMode;
                         }
                     }
 
@@ -1664,6 +1667,20 @@ namespace Labrune
         {
             IgnoreCharsetOnSave = !IgnoreCharsetOnSave;
             IgnoreCharsetOnSaveToolStripMenuItem.Checked = IgnoreCharsetOnSave;
+        }
+
+        private void ISO88591WesternToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            EncodingMode = "ISO-8859-1";
+            ISO88591WesternToolStripMenuItem.Checked = true;
+            UTF8NonWesternToolStripMenuItem.Checked = false;
+        }
+
+        private void UTF8NonWesternToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            EncodingMode = "UTF-8";
+            UTF8NonWesternToolStripMenuItem.Checked = true;
+            ISO88591WesternToolStripMenuItem.Checked = false;
         }
     }
 }
