@@ -32,6 +32,7 @@ namespace Labrune
         LanguageHistogramChunk HistChunk;
         bool IsFileModified = false;
         bool HasLabels = false;
+        bool IgnoreCharsetOnSave = false; // Debug option: ignore charset when saving
 
         List<int> FoundValuesIndexes = new List<int>();
         List<int> ModifiedValuesIndexes = new List<int>();
@@ -391,6 +392,15 @@ namespace Labrune
                     }
                 }*/
 
+                // Apply ignore charset flag to all chunks before saving
+                foreach (var chunk in Files[0].Chunks)
+                {
+                    if (chunk is LanguageChunk lc)
+                    {
+                        lc.IgnoreCharsetOnSave = IgnoreCharsetOnSave;
+                    }
+                }
+
                 // save into a .tmp file first
                 Files[0].FileName = LanguageFileName + ".tmp";
                 Files[0].WriteChunks();
@@ -425,6 +435,15 @@ namespace Labrune
                             }
                         }
                     }*/
+
+                    // Apply ignore charset flag to all chunks in label file
+                    foreach (var chunk in Files[1].Chunks)
+                    {
+                        if (chunk is LanguageChunk lc)
+                        {
+                            lc.IgnoreCharsetOnSave = IgnoreCharsetOnSave;
+                        }
+                    }
 
                     LanguageFileName = Files[1].FileName;
                     Files[1].FileName = LanguageFileName + ".tmp";
@@ -1639,6 +1658,12 @@ namespace Labrune
                     else ThrowError("Labrune", "Save Error", "Labrune was unable to save language file" + Path.GetFileName(Saver.FileName) + " to " + Path.GetDirectoryName(Saver.FileName) + "." + Environment.NewLine + "The file may be currently used, corrupt or Labrune doesn't have enough permissions to make file operations here.");
                 }
             }
+        }
+
+        private void IgnoreCharsetOnSaveToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            IgnoreCharsetOnSave = !IgnoreCharsetOnSave;
+            IgnoreCharsetOnSaveToolStripMenuItem.Checked = IgnoreCharsetOnSave;
         }
     }
 }

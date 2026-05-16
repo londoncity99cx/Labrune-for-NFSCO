@@ -5,6 +5,7 @@ Fork of [Labrune](https://github.com/nlgxzef/Labrune) by [nlgxzef](https://githu
 
 **Modifications made:**
 + ISO-8859-1 detection & fallback (needed for some NFS Carbon language files).
++ Option to ignore charset when saving
 + method for to validate if characters are present in the language files charset.
 + detailed error handling when writing characters that are not present in the language files charset for easier debugging.
 + added CharsetTransfer.csproj for transfering charsets between NFS Carbon language files (debug use only!).

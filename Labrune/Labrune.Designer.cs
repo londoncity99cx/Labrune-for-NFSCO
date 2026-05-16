@@ -58,6 +58,7 @@
             this.PrevModifiedToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.NextModifiedToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator6 = new System.Windows.Forms.ToolStripSeparator();
+            this.IgnoreCharsetOnSaveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.fontSettingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutLabruneToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -235,6 +236,7 @@
             this.PrevModifiedToolStripMenuItem,
             this.NextModifiedToolStripMenuItem,
             this.toolStripSeparator6,
+            this.IgnoreCharsetOnSaveToolStripMenuItem,
             this.fontSettingsToolStripMenuItem});
             this.editToolStripMenuItem.Name = "editToolStripMenuItem";
             this.editToolStripMenuItem.Size = new System.Drawing.Size(39, 20);
@@ -326,6 +328,13 @@
             // 
             this.toolStripSeparator6.Name = "toolStripSeparator6";
             this.toolStripSeparator6.Size = new System.Drawing.Size(218, 6);
+            // 
+            // IgnoreCharsetOnSaveToolStripMenuItem
+            // 
+            this.IgnoreCharsetOnSaveToolStripMenuItem.Name = "IgnoreCharsetOnSaveToolStripMenuItem";
+            this.IgnoreCharsetOnSaveToolStripMenuItem.Size = new System.Drawing.Size(221, 22);
+            this.IgnoreCharsetOnSaveToolStripMenuItem.Text = "Ignore Charset on Save (Debug)";
+            this.IgnoreCharsetOnSaveToolStripMenuItem.Click += new System.EventHandler(this.IgnoreCharsetOnSaveToolStripMenuItem_Click);
             // 
             // fontSettingsToolStripMenuItem
             // 
@@ -536,6 +545,7 @@
         private System.Windows.Forms.ToolStripMenuItem PrevModifiedToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem NextModifiedToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator6;
+        private System.Windows.Forms.ToolStripMenuItem IgnoreCharsetOnSaveToolStripMenuItem;
         private System.Windows.Forms.SaveFileDialog ExportFileDialog;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator7;
         private System.Windows.Forms.ToolStripMenuItem restoreBackupsToolStripMenuItem;

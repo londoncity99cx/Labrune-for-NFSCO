@@ -17,6 +17,7 @@ namespace Labrune
         public string Category; // Size: 0x10 (new files only)
         public Charset CharacterSet; // Old chunks only, from 0x10 to the StringRecordsOffset
         public List<LanguageStringRecord> Strings;
+        public bool IgnoreCharsetOnSave = false; // For debugging purposes: ignores the charset when saving
 
         public LanguageChunk(Chunk chunk, Charset characterset)
         {
@@ -90,39 +91,77 @@ namespace Labrune
         {
             try
             {
-                // Check if bytes are valid UTF-8
-                string decodedText = System.Text.Encoding.UTF8.GetString(bytes);
-                
-                // Verify the decoded text doesn't contain replacement characters
-                // (which would indicate invalid UTF-8)
-                if (!decodedText.Contains("\ufffd"))
+                // First check if the bytes form a valid UTF-8 sequence
+                if (!IsValidUTF8(bytes))
                 {
-                    // Additional check: if all bytes are < 128 (ASCII), it's valid UTF-8
-                    // If there are bytes >= 128, check if they form valid UTF-8 sequences
-                    bool hasHighBytes = false;
-                    for (int i = 0; i < bytes.Length; i++)
-                    {
-                        if (bytes[i] >= 0x80)
-                        {
-                            hasHighBytes = true;
-                            break;
-                        }
-                    }
-                    
-                    // If no high bytes, it's plain ASCII (valid UTF-8)
-                    // If high bytes exist and decoded without replacement chars, it's valid UTF-8
-                    if (!hasHighBytes || decodedText.Length > 0)
-                    {
-                        return decodedText;
-                    }
+                    return null;
                 }
+
+                // If UTF-8 structure is valid, decode it
+                string decodedText = System.Text.Encoding.UTF8.GetString(bytes);
+
+                // Verify the decoded text doesn't contain replacement characters
+                if (decodedText.Contains("\ufffd"))
+                {
+                    return null;
+                }
+
+                return decodedText;
             }
             catch
             {
-                // Invalid UTF-8, return null to fall back to ISO-8859-1
+                // Invalid UTF-8, return null
             }
-            
+
             return null;
+        }
+
+        /// <summary>
+        /// Validates if a byte array is a valid UTF-8 sequence.
+        /// </summary>
+        private bool IsValidUTF8(byte[] bytes)
+        {
+            int i = 0;
+            while (i < bytes.Length)
+            {
+                byte b = bytes[i];
+
+                if (b < 0x80)
+                {
+                    // Single byte character (0xxxxxxx)
+                    i++;
+                }
+                else if ((b & 0xE0) == 0xC0)
+                {
+                    // Two byte character (110xxxxx)
+                    if (i + 1 >= bytes.Length) return false;
+                    if ((bytes[i + 1] & 0xC0) != 0x80) return false;
+                    i += 2;
+                }
+                else if ((b & 0xF0) == 0xE0)
+                {
+                    // Three byte character (1110xxxx)
+                    if (i + 2 >= bytes.Length) return false;
+                    if ((bytes[i + 1] & 0xC0) != 0x80) return false;
+                    if ((bytes[i + 2] & 0xC0) != 0x80) return false;
+                    i += 3;
+                }
+                else if ((b & 0xF8) == 0xF0)
+                {
+                    // Four byte character (11110xxx)
+                    if (i + 3 >= bytes.Length) return false;
+                    if ((bytes[i + 1] & 0xC0) != 0x80) return false;
+                    if ((bytes[i + 2] & 0xC0) != 0x80) return false;
+                    if ((bytes[i + 3] & 0xC0) != 0x80) return false;
+                    i += 4;
+                }
+                else
+                {
+                    // Invalid UTF-8 start byte
+                    return false;
+                }
+            }
+            return true;
         }
 
         public override void Read(BinaryReader br)
@@ -140,6 +179,26 @@ namespace Labrune
                     Category = System.Text.Encoding.GetEncoding("ISO-8859-1").GetString(br.ReadBytes(CharsetOffset - 0x10)).Trim('\0', ' ');
                     CharacterSet = new Charset();
                     CharacterSet.Read(br); //0x1804 fixed size
+
+                    // Check if the charset is empty (all zeros) which indicates it was written with IgnoreCharsetOnSave
+                    // An empty charset has NumberOfEntries == 0 AND all entry table values are 0
+                    bool isEmptyCharset = (CharacterSet.NumberOfEntries == 0);
+                    if (isEmptyCharset)
+                    {
+                        for (int i = 0; i < CharacterSet.EntryTable.Length && isEmptyCharset; i++)
+                        {
+                            if (CharacterSet.EntryTable[i] != 0)
+                            {
+                                isEmptyCharset = false;
+                            }
+                        }
+                    }
+
+                    // If charset is empty, treat it as if there's no charset (will use UTF-8 detection)
+                    if (isEmptyCharset)
+                    {
+                        CharacterSet = null;
+                    }
                     break;
 
                 case LanguageFileVersion.New:
@@ -169,15 +228,16 @@ namespace Labrune
 
                 br.BaseStream.Position = TextOffset + br.ReadInt32();
                 byte[] rawBytes = ReadNullTerminated(br);
-                
+
                 if (CharacterSet != null)
                 {
+                    // Use charset decoding
                     StrRec.Text = CharacterSet.Decode(rawBytes);
                 }
                 else
                 {
-                    // Try to detect encoding: UTF-8 first, then ISO-8859-1
-                    StrRec.Text = TryDecodeAsUTF8(rawBytes) ?? System.Text.Encoding.GetEncoding("ISO-8859-1").GetString(rawBytes);
+                    // No charset, use ISO-8859-1 (game standard for Western languages)
+                    StrRec.Text = System.Text.Encoding.GetEncoding("ISO-8859-1").GetString(rawBytes);
                 }
                 StrRec.IsModified = false;
 
@@ -198,7 +258,8 @@ namespace Labrune
             byte[] LangFileCategory;
 
             // Validate that all characters can be encoded with the current Charset
-            if (CharacterSet != null)
+            // Skip validation if IgnoreCharsetOnSave is enabled (for debugging purposes)
+            if (CharacterSet != null && !IgnoreCharsetOnSave)
             {
                 ValidateCharactersInCharset();
             }
@@ -211,22 +272,15 @@ namespace Labrune
 
                 // Write string for the strings table
                 byte[] encodedBytes;
-                if (CharacterSet != null)
+                if (CharacterSet != null && !IgnoreCharsetOnSave)
                 {
                     // Encode using the charset (no fallback - ensures compatibility with game engine)
                     encodedBytes = CharacterSet.Encode(StrRec.Text);
                 }
                 else
                 {
-                    // No charset available, try UTF-8 first (for universal language support), then ISO-8859-1
-                    try
-                    {
-                        encodedBytes = System.Text.Encoding.UTF8.GetBytes(StrRec.Text + "\0");
-                    }
-                    catch
-                    {
-                        encodedBytes = System.Text.Encoding.GetEncoding("ISO-8859-1").GetBytes(StrRec.Text + "\0");
-                    }
+                    // No charset available or ignored, use ISO-8859-1 encoding (game standard for Western languages)
+                    encodedBytes = System.Text.Encoding.GetEncoding("ISO-8859-1").GetBytes(StrRec.Text + "\0");
                 }
                 LanguageStringTableWriter.Write(encodedBytes);
             }
@@ -256,7 +310,23 @@ namespace Labrune
                         Array.Resize(ref LangFileCategory, CharsetOffset - 0x10);
                         LanguageChunkDataWriter.Write(LangFileCategory);
                     }
-                    CharacterSet.Write(LanguageChunkDataWriter);
+                    // Only write the charset if we're NOT ignoring it on save
+                    if (!IgnoreCharsetOnSave)
+                    {
+                        CharacterSet.Write(LanguageChunkDataWriter);
+                    }
+                    else
+                    {
+                        // Write a completely empty charset (all zeros) to indicate no charset is used
+                        // This ensures that when reading back, CharacterSet.NumberOfEntries will be 0
+                        // and all EntryTable values will be 0, triggering the empty charset detection
+                        byte[] emptyCharset = new byte[CharacterSet.Size()];
+                        for (int i = 0; i < emptyCharset.Length; i++)
+                        {
+                            emptyCharset[i] = 0;
+                        }
+                        LanguageChunkDataWriter.Write(emptyCharset);
+                    }
                     LanguageChunkDataWriter.Write(LanguageHashTable.ToArray());
                     LanguageChunkDataWriter.Write(LanguageStringTable.ToArray());
                     break;
@@ -332,12 +402,12 @@ namespace Labrune
                 }
 
                 throw new Exception(
-                    $"Cannot save file: The Charset table is missing {missingCharacters.Count} character(s).\\n\\n" +
-                    $"Missing characters: {missingCharsStr}\\n\\n" +
-                    $"To fix this issue:\\n" +
-                    $"1. Use a file format without embedded Charset (newer game versions)\\n" +
-                    $"2. Or expand the Charset table to include these characters\\n" +
-                    $"3. Or use only characters supported by the current Charset table"
+                    $"Cannot save file: The Charset table is missing {missingCharacters.Count} character(s)." +
+                    $" Missing characters: {missingCharsStr}" +
+                    $" To fix this issue:" +
+                    $" 1. Use a file format without embedded Charset (newer game versions)" +
+                    $" 2. Or expand the Charset table to include these characters" +
+                    $" 3. Or use only characters supported by the current Charset table"
                 );
             }
         }
